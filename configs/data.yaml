@@ -1,0 +1,52 @@
+# Canonical data + experiment constants.
+# Anything that appears in the report as "we used X" should be traceable to this file.
+
+raw_dir: "../Dataverse"          # relative to the repository root
+processed_dir: "data/processed"
+
+grid:
+  side: 100                      # 100 x 100 cells over Milan
+  n_squares: 10000
+
+sampling:
+  slot_minutes: 10
+  slots_per_day: 144
+  slots_per_week: 1008
+  timezone: "Europe/Rome"        # CET throughout the observation window
+
+period:
+  start: "2013-11-01"
+  end: "2014-01-01"
+  n_days: 62
+  n_slots: 8928
+
+target: internet
+activities: [sms_in, sms_out, call_in, call_out, internet]
+
+ingestion:
+  chunksize: 2000000             # rows per pandas chunk; sets peak memory
+  accumulate_dtype: float64      # cast to float32 after summing
+  store_dtype: float32
+
+# --- fixed by the assignment brief -------------------------------------------------
+evaluation:
+  # "the week from December 16 to 22"
+  week_start: "2013-12-16 00:00"
+  week_end:   "2013-12-22 23:50"
+  horizon: 1                     # one step ahead = 10 minutes
+
+exploration:
+  # first two weeks, for the required five-cell time-series figure
+  window_start: "2013-11-01 00:00"
+  window_end:   "2013-11-14 23:50"
+  # squares the brief names explicitly, alongside the top three by total traffic
+  required_squares: [4159, 4556]
+  n_top_squares: 3
+
+# A cached copy of what milan_traffic.dataio.top_squares(3) returns, taken from
+# data/processed/square_totals.csv after the full 62-day ingestion. No code path reads this
+# key. Every script resolves its areas by calling dataio.top_squares, which re-reads the CSV,
+# so the ids below can never be the ones a run actually used. It is kept only so the report
+# and tests/test_geometry.py have one place to check the grid positions against; if it ever
+# disagrees with top_squares(3), the CSV is right and this line is stale.
+top_squares: [5161, 5059, 5259]  # grid (row, col): (51,60), (50,58), (52,58)
