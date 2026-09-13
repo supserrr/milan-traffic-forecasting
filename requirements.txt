@@ -1,0 +1,25 @@
+# Every package here is imported somewhere in src/, scripts/ or tests/. Anything that
+# stopped being imported has been removed rather than left as decoration: a requirements
+# file that overstates the dependency set makes a clean-clone install slower and the
+# report's environment description wrong.
+
+# Core
+numpy>=1.26,<3
+pandas>=2.1
+
+# Modelling
+torch>=2.2               # Apple Silicon: MPS backend, no extra index needed
+scikit-learn>=1.4        # HistGradientBoostingRegressor, the third model
+statsmodels>=0.14        # ACF/PACF, STL/MSTL, ADF/KPSS
+
+# Visualisation
+matplotlib>=3.8
+
+# Tooling
+psutil>=5.9              # peak-RSS measurement for the data-handling evidence
+PyYAML>=6.0              # run configs
+
+# Dev
+pytest>=8.0
+ruff>=0.4
+black>=24.3

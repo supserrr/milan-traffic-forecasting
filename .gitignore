@@ -1,0 +1,95 @@
+# ---------------------------------------------------------------------------
+# Data. The raw dump is ~21 GB and the processed store is ~350 MB - neither
+# belongs in git. Everything under data/ is rebuildable with `make ingest`.
+# ---------------------------------------------------------------------------
+data/**
+!data/**/
+!data/**/.gitkeep
+!data/README.md
+*.npy
+*.npz
+*.parquet
+*.feather
+Dataverse/
+*.txt.gz
+
+# Experiment artefacts: keep the config, metrics and run log, not the weights/predictions.
+# The `!experiments/runs/**/` line is load-bearing: git cannot re-include a file whose
+# parent directory is excluded, so without it the negations below never take effect
+# and every run's evidence is silently dropped.
+experiments/runs/**
+!experiments/runs/**/
+!experiments/runs/.gitkeep
+!experiments/runs/**/config.yaml
+!experiments/runs/**/metrics.json
+!experiments/runs/**/run.log
+
+# Two predictions arrays are the exception, and only two. Every result table and figure in
+# the report is derived from a stored forecast: make_results.py and make_significance.py
+# read EXP-008 (the reported run, 217 856 bytes) and make_period_breakdown.py additionally
+# reads EXP-007 (the calendar-off control, 12 224 bytes). A clean clone cannot regenerate
+# them under those ids, because run_experiment.py allocates the next free id rather than
+# overwriting a finished run, so without these two files the documented reproduction chain
+# cannot rebuild the exact evidence the report cites. Every other run's predictions stay
+# untracked: they are inputs to no documented command, and 16 more arrays is bulk without
+# a reader. These two negations must sit after `*.npy` (above) as well as after
+# `experiments/runs/**`, since the last matching pattern decides.
+!experiments/runs/EXP-008/predictions.npy
+!experiments/runs/EXP-007/predictions.npy
+*.pt
+*.pth
+*.ckpt
+
+# ---------------------------------------------------------------------------
+# Working material, not assignment deliverables: the transcribed brief and
+# rubric, the work plan, the report outline, the video script and the drafting
+# notes. These live in the workspace directory above this repository, so git
+# does not normally see them. The rules below guard against a stray copy being
+# added back in.
+# ---------------------------------------------------------------------------
+CLAUDE.md
+project-docs/
+docs/ASSIGNMENT.md
+docs/RUBRIC.md
+docs/PLAN.md
+docs/REPORT_OUTLINE.md
+docs/VIDEO_SCRIPT.md
+docs/notes/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+env/
+.python-version
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.coverage
+htmlcov/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Report build artefacts (keep the final PDF, drop LaTeX intermediates).
+# Anchored to reports/: unanchored *.log and *.out match at any depth and would swallow
+# the per-run training logs the experiment trail depends on.
+reports/*.aux
+reports/*.log
+reports/*.out
+reports/*.synctex.gz
+reports/*.bbl
+reports/*.blg
+reports/*.fls
+reports/*.fdb_latexmk

@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "milan-traffic-forecasting"
+version = "0.1.0"
+description = "Comparative analysis of sequential models for mobile network traffic forecasting"
+requires-python = ">=3.10"
+readme = "README.md"
+# Declared here as well as in requirements.txt so that `pip install -e .` on its own
+# yields a package that actually runs, rather than one that imports and then fails on
+# the first numpy call. The dev extra mirrors requirements.txt's tooling block, so that
+# `pip install -e .[dev]` is likewise enough for `make test` and
+# `make lint` rather than only for importing the package. requirements.txt stays what
+# `make setup` installs and carries the per-dependency reasoning; requirements-lock.txt
+# records the exact versions every result was produced with.
+dependencies = [
+    "numpy>=1.26,<3",
+    "pandas>=2.1",
+    "torch>=2.2",
+    "scikit-learn>=1.4",
+    "statsmodels>=0.14",
+    "matplotlib>=3.8",
+    "psutil>=5.9",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+    "black>=24.3",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+    "slow: touches the raw data or trains a model; deselect with -m 'not slow'",
+]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "scripts", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "NPY"]
+ignore = ["E501"]  # line length is handled by black
+
+[tool.ruff.lint.per-file-ignores]
+"notebooks/*" = ["E402"]
+"scripts/*" = ["E402"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
