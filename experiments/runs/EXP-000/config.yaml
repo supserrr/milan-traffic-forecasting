@@ -1,0 +1,38 @@
+run:
+  id: EXP-000
+  seed: 42
+  device: cpu
+  notes: Baseline floor. No trained sequence model yet.
+data:
+  areas:
+  - 5161
+  - 5059
+  - 5259
+  - 4159
+  - 4556
+  activity: internet
+  seq_len: 1008
+  horizon: 1
+  scaling: none
+  val_frac: 0.15
+  test_window: eval_week
+models:
+- linear_ar_144
+- linear_ar_36
+- linear_ar_6
+- naive
+- seasonal_naive_1008
+- seasonal_naive_144
+- time_of_day_mean_4d
+evaluation:
+  metrics:
+  - MAE
+  - RMSE
+  - MAPE
+  - sMAPE
+  - WAPE
+  - MASE
+  - R2
+  mape_mode: epsilon
+  mase_scale: training period (Hyndman)
+  season: 144
