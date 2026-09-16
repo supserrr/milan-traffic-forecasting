@@ -7,6 +7,12 @@ afterwards. This file is the evidence for the "Experimentation & Hyperparameter 
 Each run also writes `experiments/runs/EXP-NNN/` containing `config.yaml`, `metrics.json`,
 `predictions.npy` and `run.log`. Never overwrite a previous run.
 
+The campaign is compressed and the timestamps say so: each fit costs under a minute, so the whole
+trained campaign EXP-001 to EXP-008 ran in one 40-minute session on 16 September (run directory
+timestamps 12:12 to 12:52), with the rows committed as each run finished, in four commits between
+12:20 and 12:58; EXP-010 to EXP-018 followed in 13 minutes the next morning. Two earlier entries
+were corrected afterwards rather than rewritten, and both corrections are noted in place.
+
 ## How to fill this in
 
 - **Changed** - only what differs from the previous run. One variable at a time while reasoning
@@ -29,6 +35,7 @@ Each run also writes `experiments/runs/EXP-NNN/` containing `config.yaml`, `metr
 | EXP-005 | 2026-09-16 | tcn on 5059, 3 seeds, calendar off | control for EXP-004 | 85.86 | 67.41 | 97.33 | 38.30 | 22.38 | Same defect, same zero variance. The point estimate is still the one from EXP-003, and the 23 percent gap to the calendar-on configuration is unaffected by the bug because both sides of the comparison ran at seed 42. What is unknown until EXP-007 is how much of that gap is seed noise. |
 | EXP-006 | 2026-09-16 | tcn on 5059, 3 seeds, calendar on | repeat of EXP-004 with the seed leak fixed | 88.30 | 78.88 | 115.32 | 37.74 | 22.68 | Seeds now differ: test MAE 82.90 / 76.02 / 77.72, mean 78.88, sd 3.58. The single-seed 82.90 was the worst of the three, so EXP-001 to EXP-003 overstated the failure, though not by enough to change it. Next: EXP-007 gives the control the same treatment. |
 | EXP-007 | 2026-09-16 | tcn on 5059, 3 seeds, calendar off | control for EXP-006 | 83.28 | 68.42 | 98.78 | 38.16 | 20.88 | Test MAE 67.41 / 69.35 / 68.50, mean 68.42, sd 0.97. The calendar block costs the TCN 10.5 MAE on this cell, about three standard deviations of the noisier condition, and it also triples the seed variance (3.58 against 0.97). The effect is real, not a lucky seed. It is kept on for every model anyway, because it helps the other eight fits and switching it off for one model on one cell would break the equal-information comparison the brief asks for; instead it becomes the reported failure case. Next: EXP-008, the reported configuration, three models x three areas x three seeds. |
+| EXP-008 | 2026-09-16 | lstm, tcn, gbt on all three areas, 3 seeds (+ naive, seasonal_naive_144, linear_ar_144) | the reported configuration: log1p-standard, calendar on, seeds 42 / 1337 / 2024 | 100.11 | 82.13 | 124.35 | 40.76 | 20.90 | The run the report is built from. Row is the TCN on 5161, mean over seeds. Best model per cell: TCN 82.13 on 5161, **linear AR(144) 66.25 on 5059**, TCN 61.43 on 5259. The linear model wins outright on 5059 on all six metrics, beating the best trained model by 7.1 percent, and loses by only 3.4 and 3.5 percent on the other two. Averaged over the three cells the two are level: the per-area best trained model reaches 71.63 MAE against the linear model's 71.64, a difference of 0.015 percent, and the mean of the three per-area margins is -0.25 percent in the linear model's favour. A 145-parameter fit costing 0.02 s to train against 44 s therefore matches three modern sequence architectures. That is the study's headline and it is a negative one. Campaign closed. |
 
 ---
 
@@ -172,6 +179,142 @@ changes the level of the number by a factor of six, so the report names the meth
 Standardisation and log1p-standard should be compared explicitly in an experiment rather than
 assumed.
 
+### Architecture and capacity
+
+#### EXP-001: the first trained run (2026-09-16)
+
+Three architectures, one seed, seq_len 144, standard scaling, calendar features on, against
+persistence, the daily seasonal naive and linear AR(144) fed the identical 144-step window. Test
+MAE, with the change against persistence and against AR(144):
+
+| area | lstm | tcn | gbt | naive | linear_ar_144 |
+|---|---:|---:|---:|---:|---:|
+| 5161 | 88.54 (-4.6%, +2.9%) | **83.72 (-9.8%, -2.7%)** | 92.06 (-0.8%, +7.0%) | 92.80 | 86.05 |
+| 5059 | **71.21 (-12.6%, -1.3%)** | 84.63 (**+3.8%**, +17.3%) | 77.04 (-5.5%, +6.8%) | 81.52 | 72.12 |
+| 5259 | 67.09 (-11.7%, +1.3%) | **62.58 (-17.6%, -5.5%)** | 67.06 (-11.7%, +1.2%) | 75.97 | 66.25 |
+
+Four readings.
+
+1. **The ranking is not stable across areas.** The TCN is the best model on 5161 and 5259 and the
+   worst on 5059, where it is the only trained model that loses to persistence. The LSTM and the
+   tree model are within a few percent of each other everywhere. A single-area comparison would
+   have reported "the TCN wins" and been wrong about a third of the data, which is the point the
+   brief's cross-area requirement exists to expose.
+2. **Linear AR(144) is the real competitor, not persistence.** Every trained model clears
+   persistence on at least two cells, but only the TCN clears AR(144), and only by 2.7 percent on
+   5161 and 5.5 percent on 5259. Seven of the nine trained fits are within 3 percent of a
+   145-parameter linear model that fits in 47 ms. At one step ahead the nonlinearity is worth
+   very little, and the report should say so rather than bury it.
+3. **Validation error exceeds test error everywhere, as predicted.** Persistence scores
+   val/test MAE ratios of 1.26, 1.23 and 1.18 on the three cells. The validation week (Dec 9-15) is
+   the busiest of the record, so this is the calendar and not a defect, and it was written into the
+   Methodology before the run. Worth watching: early stopping selects on that week, and the TCN's
+   failure on 5059 comes with a best epoch of 18 out of 28, so the selection may be the problem.
+4. **Cost differs by two orders of magnitude for almost the same accuracy.** Fitting costs 33 to
+   52 s for the neural models against 3 to 5 s for the tree model and 47 ms for AR(144); batch
+   inference over 1008 windows is 14 to 23 ms on `mps` against 0.06 ms for AR(144). The
+   computational argument does not favour the deep models here.
+
+Next: EXP-002 changes exactly one thing, the input transform, because that is the only input
+decision the EDA left open (rolling mean/std correlation 0.973 raw against 0.235 after log1p).
+
+#### EXP-002: the input transform (2026-09-16)
+
+`standard` to `log1p-standard`, nothing else. Test MAE, with the change against EXP-001:
+
+| area | lstm | tcn | gbt |
+|---|---:|---:|---:|
+| 5161 | 84.14 (-5.0%) | **78.00 (-6.8%)** | 84.95 (-7.7%) |
+| 5059 | **68.53 (-3.8%)** | 82.90 (-2.0%) | 71.78 (-6.8%) |
+| 5259 | 65.81 (-1.9%) | **60.94 (-2.6%)** | 63.51 (-5.3%) |
+
+The table above is test MAE, and that is the wrong set to decide on. Corrected, on validation:
+log1p lowers MAE on six of the nine fits by 1.1 to 4.0 percent and raises it on three, the TCN at
+5059 by 6.6 percent, the tree model at 5161 by 4.5 percent and the LSTM at 5259 by 0.6 percent.
+The mean change is -0.33 percent, so on the only set a selection may use the transform is close to
+a wash. On the evaluation week it happens to improve all nine by 1.9 to 7.7 percent, which is a
+fact about that week and not a reason, and an earlier draft of this entry quoted it as one.
+
+What the decision actually rests on is the training-slice evidence that motivated trying the
+transform at all: the trailing 144-slot rolling mean and standard deviation correlate at 0.973 raw
+and 0.235 after log1p, and the STL remainder share falls from 0.048 to 0.023. Neither number
+touches validation or test.
+
+The transform is not free either way: RMSE improves on only five of the nine fits and worsens on
+the LSTM at 5161 and 5059 and the TCN at 5059 and 5259. That asymmetry is the theory rather than
+noise. Fitting the squared error of the log-transformed target estimates the conditional mean of
+`log(1+y)`, whose back-transform is the conditional *median* of `y`, and the median minimises
+absolute error while the mean minimises squared error. The choice of headline metric therefore
+decides the choice of transform, not the other way round. MAE is the metric the brief names first,
+so `log1p-standard` is adopted, the RMSE cost is reported rather than hidden, and the marginal
+validation margin is recorded as the weak evidence it is.
+
+One detail worth flagging forward: the single worst validation case for the transform is the TCN
+on square 5059, the configuration that later becomes the study's failure case.
+
+The ranking from EXP-001 survives the change: the TCN is still best on 5161 and 5259 and still
+loses to persistence on 5059 (82.90 against 81.52). The transform was never going to fix that,
+which is the first sign the 5059 failure is structural rather than a matter of preprocessing.
+
+#### EXP-003 to EXP-007: diagnosing the 5059 failure, and a defect found by doing so
+
+Switching the calendar block off costs 0.8 to 2.5 percent of MAE on eight of the nine fits, so it
+earns its place. The ninth reverses: the TCN on 5059 improves by 23 percent without it (67.41
+against 82.90), and it is worse with the features on validation too (91.98 against 85.86), so this
+is the model training worse rather than early stopping choosing badly.
+
+Repeating that single configuration over three seeds was supposed to be a formality and instead
+found a defect. EXP-004 and EXP-005 returned a standard deviation of **exactly 0.000** across
+seeds 42, 1337 and 2024. No stochastic network does that. The cause: `run_model` seeded the global
+generators and then `TorchForecaster.fit` called `set_seed(self.seed)` from its own constructor
+default, and `GBTForecaster` passed its own `random_state`, so both models re-seeded themselves to
+42 whatever the harness had asked for. Every run in this log before EXP-006 used seed 42 no matter
+what its config recorded. The harness now pushes the run's seed onto the model before fitting, and
+a test asserts that a model which seeds itself receives the run's value.
+
+With seeds that genuinely differ, the finding holds and sharpens:
+
+| TCN on 5059 | seed 42 | seed 1337 | seed 2024 | mean | sd |
+|---|---:|---:|---:|---:|---:|
+| calendar on (EXP-006) | 82.90 | 76.02 | 77.72 | 78.88 | 3.58 |
+| calendar off (EXP-007) | 67.41 | 69.35 | 68.50 | **68.42** | **0.97** |
+
+The single-seed number in EXP-003 was the worst of the three, so the earlier runs overstated the
+failure without changing its direction. The calendar block costs this model on this cell about
+10.5 MAE, roughly three standard deviations of the noisier arm, and it triples the seed variance.
+
+The features stay on for every model. Turning them off for one architecture on one cell would buy
+about 12 percent of MAE there and destroy the equal-information comparison the brief requires, and
+the interaction is more interesting reported than hidden. It becomes the failure case: square 5059
+is the cell whose weekday-to-weekend ratio is nearest one (1.29 against 0.79 and 2.98), so its
+calendar signal is the weakest of the three, while the TCN is the architecture that sees the
+features only at its final time step rather than through a recurrent state. A weak signal injected
+at one point appears to act as noise that the convolutional stack cannot down-weight.
+
+### What did not work
+
+Record these. A failed direction with a diagnosis is worth more than a silent omission.
+
+- **Smoothing the seasonal baseline made it worse.** Averaging the same time-of-day slot over four
+  days (`time_of_day_mean_4d`) was expected to beat a single lagged day by suppressing day-to-day
+  noise. It lost to the single lagged day on all five cells on MAE (three of five on RMSE) and
+  posted MASE above 1 on two of them. The daily profile
+  is not stable enough day to day for the average to be a better estimate than yesterday, which is
+  itself a finding about how non-stationary the profile is.
+- **The weekly seasonal naive beat the daily one on the top cell** (MAE 300.8 against 338.6), which
+  is the opposite of the usual ordering and says the day-of-week identity carries more signal than
+  the previous day does. Worth one sentence in the report; it argues for calendar features over a
+  single seasonal lag.
+
+### Metric definitions worth stating in the report
+
+`metrics.mase` originally scaled by the seasonal-naive error of the window being scored. On this
+data the evaluation week is calmer than the training period, so that inflated every MASE by about a
+third and inverted the "below 1 beats seasonal persistence" reading: a pure seasonal-naive forecast
+scored 1.34. It now takes an explicit `scale`, and EXP-000 passes the training-period value, under
+which that same forecast scores 0.980 as it should. Any MASE quoted in the report is the
+training-scaled one.
+
 ### Harness corrections before EXP-001 (2026-09-15)
 
 An audit of the evaluation path before the first trained run found three defects, in
@@ -213,3 +356,32 @@ setting under which the reported metrics were in the right units. The method is 
 reverting it and watching between one and six of those tests fail. Worth a paragraph in the report
 rather than a quiet fix: the episode is a concrete argument for feeding all three models through one
 shared path, and for the distinction between a green test suite and correct numbers.
+
+### EXP-008: the reported configuration (2026-09-16)
+
+Three architectures, three areas, three seeds, log1p-standard, calendar features on, against the
+reference forecasters at the identical 144-slot window. Test MAE, mean over seeds, with the
+standard deviation for the trained models:
+
+| area | lstm | tcn | gbt | naive | linear_ar_144 |
+|---|---:|---:|---:|---:|---:|
+| 5161 | 84.42 (1.41) | **82.13 (6.65)** | 87.08 (1.87) | 92.80 | 84.98 |
+| 5059 | 71.84 (2.97) | 78.88 (3.58) | 71.32 (0.53) | 81.52 | **66.25** |
+| 5259 | 65.70 (0.29) | **61.43 (0.46)** | 64.08 (0.51) | 75.97 | 63.69 |
+
+**The linear autoregression wins on 5059 on every one of the six metrics**, by 7.1 percent of MAE
+over the best trained model, and loses by 3.4 and 3.5 percent on the other two cells. Averaged
+across the three the two are level: the best trained model per cell reaches 71.63 MAE against the
+linear model's 71.64, a difference of 0.015 percent, and the mean of the three per-area margins is
+-0.25 percent in the linear model's favour. A 145-parameter fit that costs 0.02 s to train is
+therefore level with three modern sequence architectures costing 2 to 44 s, and beats them outright
+on a third of the data. This is the study's headline, and it is the result the critical literature
+predicts for short horizons.
+
+Two further readings. The seed spread is informative in itself: the TCN's standard deviation is
+6.65 on 5161 and 3.58 on 5059 against 0.29 to 0.53 for the LSTM and the tree model on their better
+cells, so the architecture that wins twice is also the least reliable, and a single-seed comparison
+would have been reporting noise on the order of the gaps being compared. And the daily seasonal
+naive is not merely weak but wrong at this horizon, at 338.6 / 171.7 / 470.3 against persistence's
+92.8 / 81.5 / 76.0; a ten-minute-old observation beats a day-old one, which is the same conclusion
+the sequence-length evidence reached from the other direction.
