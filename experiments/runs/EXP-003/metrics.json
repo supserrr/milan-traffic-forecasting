@@ -1,0 +1,488 @@
+{
+  "run_id": "EXP-003",
+  "hardware": "Darwin | 27.0.0 | arm64 | 8P/8L cores | 16 GiB RAM | device:cpu,mps",
+  "predictions_axes": [
+    "area",
+    "model",
+    "seed",
+    "step"
+  ],
+  "areas": [
+    5059,
+    5161,
+    5259
+  ],
+  "models": [
+    "lstm",
+    "tcn",
+    "gbt"
+  ],
+  "seeds": [
+    42
+  ],
+  "device_by_model": {
+    "lstm": "mps",
+    "tcn": "mps",
+    "gbt": "cpu"
+  },
+  "timing_protocol": {
+    "fit_s": "wall seconds of one fit call, device synchronised before the clock stops",
+    "fit_cpu_s": "process CPU seconds of the same call",
+    "predict_ms_batch_median": "median of n repetitions of predicting the whole evaluation window, after one untimed warm-up call, device synchronised before each stop",
+    "latency_ms_single_median": "median of n repetitions of predicting a single window, after two untimed warm-ups",
+    "why": "single-shot timings varied five-fold for identical operations in EXP-000, and the first MPS call at a new batch shape is about thirty times slower than a warm one"
+  },
+  "config": {
+    "run": {
+      "id": "EXP-003",
+      "seeds": [
+        42
+      ],
+      "device": "auto",
+      "notes": "EXP-003: calendar features off for all three models, everything else as EXP-002. Measures what the five target-slot features are worth, and keeps the comparison at equal information either way.",
+      "cli": "--models lstm tcn gbt --seq-len 144 --scaling log1p-standard --no-calendar --seeds 42 --notes EXP-003: calendar features off for all three models, everything else as EXP-002. Measures what the five target-slot features are worth, and keeps the comparison at equal information either way.",
+      "config_source": "configs/experiment.yaml"
+    },
+    "data": {
+      "areas": [
+        5161,
+        5059,
+        5259
+      ],
+      "activity": "internet",
+      "seq_len": 144,
+      "horizon": 1,
+      "scaling": "log1p-standard",
+      "val_frac": 0.15555555555555556,
+      "calendar_features": false,
+      "test_window": "eval_week"
+    },
+    "models": {
+      "lstm": {
+        "loss": "mse",
+        "lr": 0.001,
+        "batch_size": 128,
+        "max_epochs": 100,
+        "patience": 10,
+        "device": "auto",
+        "hidden": 64,
+        "layers": 1,
+        "dropout": 0.1
+      },
+      "tcn": {
+        "loss": "mse",
+        "lr": 0.001,
+        "batch_size": 128,
+        "max_epochs": 100,
+        "patience": 10,
+        "device": "auto",
+        "channels": 32,
+        "levels": 6,
+        "kernel_size": 3,
+        "dropout": 0.1
+      },
+      "gbt": {
+        "max_iter": 300,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 31
+      }
+    },
+    "training": {
+      "loss": "mse",
+      "lr": 0.001,
+      "batch_size": 128,
+      "max_epochs": 100,
+      "early_stopping": {
+        "monitor": "val_loss",
+        "patience": 10
+      }
+    },
+    "evaluation": {
+      "metrics": [
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "WAPE",
+        "MASE",
+        "R2"
+      ],
+      "mape_mode": "epsilon",
+      "mase_scale": "training period (Hyndman)",
+      "season": 144,
+      "timing_reps": 20,
+      "latency_reps": 50
+    }
+  },
+  "results": [
+    {
+      "area": 5161,
+      "model": "lstm",
+      "n_params": 17217,
+      "val": {
+        "MAE": 106.50648369723932,
+        "RMSE": 163.21068685206123,
+        "MAPE": 7.772559004945978,
+        "sMAPE": 7.823945112625472,
+        "WAPE": 6.2762702097176115,
+        "MASE": 0.3065874800923418,
+        "R2": 0.9884919348872894,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 84.8298660926403,
+        "RMSE": 130.09543529009073,
+        "MAPE": 8.031642465001777,
+        "sMAPE": 7.872199606914214,
+        "WAPE": 5.8699729300013015,
+        "MASE": 0.24418959277488111,
+        "R2": 0.9908774716864633,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 31.228732624993427,
+      "fit_cpu_s": 13.125828,
+      "predict_s": 0.012969229006557725,
+      "predict_us_per_step": 12.86629861761679,
+      "predict_ms_batch_median": 12.969229006557725,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 2.840937508153729,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "mps",
+      "n_epochs": 49,
+      "best_epoch": 39,
+      "s_per_epoch": 0.6358575765316716,
+      "stopped_early": true
+    },
+    {
+      "area": 5161,
+      "model": "tcn",
+      "n_params": 34753,
+      "val": {
+        "MAE": 99.52320865171168,
+        "RMSE": 151.96978197228532,
+        "MAPE": 7.343020657180148,
+        "sMAPE": 7.339593658555835,
+        "WAPE": 5.864756097026596,
+        "MASE": 0.28648556117925367,
+        "R2": 0.9900225489374038,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 79.85108757377732,
+        "RMSE": 121.79221126923007,
+        "MAPE": 7.603698614924426,
+        "sMAPE": 7.387119974616395,
+        "WAPE": 5.525456352569933,
+        "MASE": 0.22985777834398513,
+        "R2": 0.9920047852358058,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 45.617802790977294,
+      "fit_cpu_s": 19.493184,
+      "predict_s": 0.020361708491691388,
+      "predict_us_per_step": 20.20010763064622,
+      "predict_ms_batch_median": 20.361708491691388,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.0741459922865033,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "mps",
+      "n_epochs": 36,
+      "best_epoch": 26,
+      "s_per_epoch": 1.2666094930844136,
+      "stopped_early": true
+    },
+    {
+      "area": 5161,
+      "model": "gbt",
+      "n_params": 3875,
+      "val": {
+        "MAE": 105.6072514207871,
+        "RMSE": 164.34971170059995,
+        "MAPE": 7.650712076458284,
+        "sMAPE": 7.674394096435138,
+        "WAPE": 6.2232797761553025,
+        "MASE": 0.30399896765549445,
+        "R2": 0.9883307479976381,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 85.66524205547385,
+        "RMSE": 127.73459471763373,
+        "MAPE": 8.31784272061606,
+        "sMAPE": 8.118472045431977,
+        "WAPE": 5.927778447256882,
+        "MASE": 0.24659428967674205,
+        "R2": 0.9912055603784802,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 1.7678894170094281,
+      "fit_cpu_s": 7.506408999999998,
+      "predict_s": 0.007681396004045382,
+      "predict_us_per_step": 7.620432543695816,
+      "predict_ms_batch_median": 7.681396004045382,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 5.791812494862825,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "cpu",
+      "n_epochs": 125,
+      "best_epoch": 105,
+      "s_per_epoch": 0.014074437000090256,
+      "stopped_early": true
+    },
+    {
+      "area": 5059,
+      "model": "lstm",
+      "n_params": 17217,
+      "val": {
+        "MAE": 86.27821824381088,
+        "RMSE": 124.8690639503312,
+        "MAPE": 7.112502538357981,
+        "sMAPE": 7.141257112627127,
+        "WAPE": 5.774327688875944,
+        "MASE": 0.319213156287165,
+        "R2": 0.9865398757737706,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 70.20180382632859,
+        "RMSE": 103.16507495352626,
+        "MAPE": 6.607625031112287,
+        "sMAPE": 6.543274245733831,
+        "WAPE": 5.547616694189162,
+        "MASE": 0.2597334510679032,
+        "R2": 0.9879092092162124,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 17.59307249999256,
+      "fit_cpu_s": 7.660727999999999,
+      "predict_s": 0.013169812504202127,
+      "predict_us_per_step": 13.065290182740206,
+      "predict_ms_batch_median": 13.169812504202127,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.006209008162841,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "mps",
+      "n_epochs": 28,
+      "best_epoch": 18,
+      "s_per_epoch": 0.6280365000316773,
+      "stopped_early": true
+    },
+    {
+      "area": 5059,
+      "model": "tcn",
+      "n_params": 34753,
+      "val": {
+        "MAE": 85.85572249982971,
+        "RMSE": 126.61455153727951,
+        "MAPE": 6.757024426825057,
+        "sMAPE": 6.79352198966676,
+        "WAPE": 5.746051387828458,
+        "MASE": 0.31765000161499723,
+        "R2": 0.9861609398178878,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 67.41263258446702,
+        "RMSE": 97.32823440324728,
+        "MAPE": 6.466337611052331,
+        "sMAPE": 6.3627664185921455,
+        "WAPE": 5.327205649159854,
+        "MASE": 0.2494140428364532,
+        "R2": 0.9892386439586421,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 37.52518591698026,
+      "fit_cpu_s": 15.905797,
+      "predict_s": 0.020301957993069664,
+      "predict_us_per_step": 20.140831342331015,
+      "predict_ms_batch_median": 20.301957993069664,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.0491460056509823,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "mps",
+      "n_epochs": 30,
+      "best_epoch": 20,
+      "s_per_epoch": 1.250266389066625,
+      "stopped_early": true
+    },
+    {
+      "area": 5059,
+      "model": "gbt",
+      "n_params": 3596,
+      "val": {
+        "MAE": 103.82802275743121,
+        "RMSE": 153.96537909045892,
+        "MAPE": 7.927809043789938,
+        "sMAPE": 7.87130781858085,
+        "WAPE": 6.948880480995377,
+        "MASE": 0.384144127336945,
+        "R2": 0.9795362365441953,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 70.72013833484567,
+        "RMSE": 102.16781882889249,
+        "MAPE": 6.778151393163162,
+        "sMAPE": 6.658253492207534,
+        "WAPE": 5.58857748174581,
+        "MASE": 0.26165119111683105,
+        "R2": 0.988141833232802,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 1.6161593339929823,
+      "fit_cpu_s": 6.99304699999999,
+      "predict_s": 0.006978354009333998,
+      "predict_us_per_step": 6.922970247355157,
+      "predict_ms_batch_median": 6.978354009333998,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 5.30431249353569,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "cpu",
+      "n_epochs": 116,
+      "best_epoch": 96,
+      "s_per_epoch": 0.01386683009482583,
+      "stopped_early": true
+    },
+    {
+      "area": 5259,
+      "model": "lstm",
+      "n_params": 17217,
+      "val": {
+        "MAE": 77.58017906189211,
+        "RMSE": 115.23977836093201,
+        "MAPE": 6.788076927776185,
+        "sMAPE": 6.7673890868819555,
+        "WAPE": 5.359501464478228,
+        "MASE": 0.1481461757580693,
+        "R2": 0.9904034168934264,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 66.94878251812187,
+        "RMSE": 96.1240168397533,
+        "MAPE": 7.218859637368114,
+        "sMAPE": 7.137172755761389,
+        "WAPE": 5.291982086004646,
+        "MASE": 0.12784458893560774,
+        "R2": 0.992648638252392,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 34.297544917004416,
+      "fit_cpu_s": 14.719425999999999,
+      "predict_s": 0.01288718800060451,
+      "predict_us_per_step": 12.784908730758442,
+      "predict_ms_batch_median": 12.88718800060451,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 2.9715415148530155,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "mps",
+      "n_epochs": 55,
+      "best_epoch": 45,
+      "s_per_epoch": 0.623438704493773,
+      "stopped_early": true
+    },
+    {
+      "area": 5259,
+      "model": "tcn",
+      "n_params": 34753,
+      "val": {
+        "MAE": 69.37763808407581,
+        "RMSE": 102.33945928581521,
+        "MAPE": 5.941703891365005,
+        "sMAPE": 5.901672058265983,
+        "WAPE": 4.792842159039176,
+        "MASE": 0.13248270227738945,
+        "R2": 0.9924317052750362,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 62.517756811200094,
+        "RMSE": 92.42581034517842,
+        "MAPE": 6.709381403873013,
+        "sMAPE": 6.513770300604778,
+        "WAPE": 4.941730628372704,
+        "MASE": 0.11938315560168283,
+        "R2": 0.9932034188551488,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 52.78924787498545,
+      "fit_cpu_s": 22.482969999999995,
+      "predict_s": 0.020931874503730796,
+      "predict_us_per_step": 20.76574851560595,
+      "predict_ms_batch_median": 20.931874503730796,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.1513124995399266,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "mps",
+      "n_epochs": 42,
+      "best_epoch": 32,
+      "s_per_epoch": 1.2563997807377572,
+      "stopped_early": true
+    },
+    {
+      "area": 5259,
+      "model": "gbt",
+      "n_params": 3937,
+      "val": {
+        "MAE": 73.92534109158886,
+        "RMSE": 111.9482768169295,
+        "MAPE": 6.162797340654182,
+        "sMAPE": 6.174556152462262,
+        "WAPE": 5.107012881812754,
+        "MASE": 0.14116694117955858,
+        "R2": 0.9909437870513021,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 64.02625620277279,
+        "RMSE": 92.8150616619537,
+        "MAPE": 6.898235539508497,
+        "sMAPE": 6.754190609524972,
+        "WAPE": 5.0609703136469015,
+        "MASE": 0.12226376787529696,
+        "R2": 0.9931460507005879,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 2.286493916006293,
+      "fit_cpu_s": 8.750231999999997,
+      "predict_s": 0.008712729497347027,
+      "predict_us_per_step": 8.643580850542685,
+      "predict_ms_batch_median": 8.712729497347027,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 6.541458496940322,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "cpu",
+      "n_epochs": 127,
+      "best_epoch": 107,
+      "s_per_epoch": 0.017925549535480454,
+      "stopped_early": true
+    }
+  ]
+}

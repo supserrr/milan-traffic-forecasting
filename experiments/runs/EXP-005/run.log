@@ -1,0 +1,13 @@
+EXP-005
+hardware: Darwin | 27.0.0 | arm64 | 8P/8L cores | 16 GiB RAM | device:mps
+
+EXP-005: the same three seeds with calendar features off, as the control for EXP-004.
+
+ area model  seed  n_params     MAE    RMSE   MAPE  sMAPE   WAPE   MASE     R2  n_scored  n_dropped device  epochs  best_epoch  s_per_epoch   fit_s  fit_cpu_s  predict_ms  latency_ms  predict_us_per_step
+ 5059   tcn    42     34753 67.4126 97.3282 6.4663 6.3628 5.3272 0.2494 0.9892      1008          0    mps      30          20        1.328 39.9418    17.9727      25.095      3.7354               24.896
+ 5059   tcn  1337     34753 67.4126 97.3282 6.4663 6.3628 5.3272 0.2494 0.9892      1008          0    mps      30          20        1.264 37.9475    16.5370      21.240      3.1939               21.072
+ 5059   tcn  2024     34753 67.4126 97.3282 6.4663 6.3628 5.3272 0.2494 0.9892      1008          0    mps      30          20        1.233 37.0117    15.6940      20.805      2.9472               20.640
+
+mean and std over seeds:
+ area model  n_params_mean  n_params_std  MAE_mean  MAE_std  RMSE_mean  RMSE_std  MAPE_mean  MAPE_std  sMAPE_mean  sMAPE_std  WAPE_mean  WAPE_std  MASE_mean  MASE_std  R2_mean  R2_std  n_scored_mean  n_scored_std  n_dropped_mean  n_dropped_std  s_per_epoch_mean  s_per_epoch_std  fit_s_mean  fit_s_std  fit_cpu_s_mean  fit_cpu_s_std  predict_ms_mean  predict_ms_std  latency_ms_mean  latency_ms_std  predict_us_per_step_mean  predict_us_per_step_std
+ 5059   tcn        34753.0           0.0   67.4126      0.0    97.3282       0.0     6.4663       0.0      6.3628        0.0     5.3272       0.0     0.2494       0.0   0.9892     0.0         1008.0           0.0             0.0            0.0             1.275           0.0484     38.3003     1.4966         16.7346         1.1521            22.38          2.3613           3.2922          0.4032                   22.2027                   2.3425
