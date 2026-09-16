@@ -1,0 +1,73 @@
+run:
+  id: EXP-002
+  seeds:
+  - 42
+  device: auto
+  notes: 'EXP-002: log1p-standard in place of standard. Only the input transform changes.
+    The rolling mean and std correlate at 0.973 raw and 0.235 after log1p on the training
+    slice, so the noise is multiplicative and the transform should stabilise it.'
+  cli: '--models lstm tcn gbt --seq-len 144 --scaling log1p-standard --seeds 42 --notes
+    EXP-002: log1p-standard in place of standard. Only the input transform changes.
+    The rolling mean and std correlate at 0.973 raw and 0.235 after log1p on the training
+    slice, so the noise is multiplicative and the transform should stabilise it.'
+  config_source: configs/experiment.yaml
+data:
+  areas:
+  - 5161
+  - 5059
+  - 5259
+  activity: internet
+  seq_len: 144
+  horizon: 1
+  scaling: log1p-standard
+  val_frac: 0.15555555555555556
+  calendar_features: true
+  test_window: eval_week
+models:
+  lstm:
+    loss: mse
+    lr: 0.001
+    batch_size: 128
+    max_epochs: 100
+    patience: 10
+    device: auto
+    hidden: 64
+    layers: 1
+    dropout: 0.1
+  tcn:
+    loss: mse
+    lr: 0.001
+    batch_size: 128
+    max_epochs: 100
+    patience: 10
+    device: auto
+    channels: 32
+    levels: 6
+    kernel_size: 3
+    dropout: 0.1
+  gbt:
+    max_iter: 300
+    learning_rate: 0.05
+    max_leaf_nodes: 31
+training:
+  loss: mse
+  lr: 0.001
+  batch_size: 128
+  max_epochs: 100
+  early_stopping:
+    monitor: val_loss
+    patience: 10
+evaluation:
+  metrics:
+  - MAE
+  - RMSE
+  - MAPE
+  - sMAPE
+  - WAPE
+  - MASE
+  - R2
+  mape_mode: epsilon
+  mase_scale: training period (Hyndman)
+  season: 144
+  timing_reps: 20
+  latency_reps: 50
