@@ -1,0 +1,222 @@
+{
+  "run_id": "EXP-014",
+  "hardware": "Darwin | 27.0.0 | arm64 | 8P/8L cores | 16 GiB RAM | device:mps",
+  "predictions_axes": [
+    "area",
+    "model",
+    "seed",
+    "step"
+  ],
+  "areas": [
+    5161
+  ],
+  "models": [
+    "tcn"
+  ],
+  "seeds": [
+    42,
+    1337,
+    2024
+  ],
+  "device_by_model": {
+    "tcn": "mps"
+  },
+  "timing_protocol": {
+    "fit_s": "wall seconds of one fit call, device synchronised before the clock stops",
+    "fit_cpu_s": "process CPU seconds of the same call",
+    "predict_ms_batch_median": "median of n repetitions of predicting the whole evaluation window, after one untimed warm-up call, device synchronised before each stop",
+    "latency_ms_single_median": "median of n repetitions of predicting a single window, after two untimed warm-ups",
+    "why": "single-shot timings varied five-fold for identical operations in EXP-000, and the first MPS call at a new batch shape is about thirty times slower than a warm one"
+  },
+  "config": {
+    "run": {
+      "id": "EXP-014",
+      "seeds": [
+        42,
+        1337,
+        2024
+      ],
+      "device": "auto",
+      "notes": "EXP-014: capacity grid, TCN width 64. Doubles the channels at the reported depth, receptive field unchanged at 253.",
+      "cli": "--areas 5161 --seeds 42 1337 2024 --seq-len 144 --scaling log1p-standard --baselines --run-id EXP-014 --models tcn --channels 64 --notes EXP-014: capacity grid, TCN width 64. Doubles the channels at the reported depth, receptive field unchanged at 253.",
+      "config_source": "configs/experiment.yaml"
+    },
+    "data": {
+      "areas": [
+        5161
+      ],
+      "activity": "internet",
+      "seq_len": 144,
+      "horizon": 1,
+      "scaling": "log1p-standard",
+      "val_frac": 0.15555555555555556,
+      "calendar_features": true,
+      "test_window": "eval_week"
+    },
+    "models": {
+      "tcn": {
+        "loss": "mse",
+        "lr": 0.001,
+        "batch_size": 128,
+        "max_epochs": 100,
+        "patience": 10,
+        "device": "auto",
+        "channels": 64,
+        "levels": 6,
+        "kernel_size": 3,
+        "dropout": 0.1
+      }
+    },
+    "training": {
+      "loss": "mse",
+      "lr": 0.001,
+      "batch_size": 128,
+      "max_epochs": 100,
+      "early_stopping": {
+        "monitor": "val_loss",
+        "patience": 10
+      }
+    },
+    "evaluation": {
+      "metrics": [
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "WAPE",
+        "MASE",
+        "R2"
+      ],
+      "mape_mode": "epsilon",
+      "mase_scale": "training period (Hyndman)",
+      "season": 144,
+      "timing_reps": 20,
+      "latency_reps": 50
+    }
+  },
+  "results": [
+    {
+      "area": 5161,
+      "model": "tcn",
+      "n_params": 137094,
+      "val": {
+        "MAE": 100.70245082969817,
+        "RMSE": 154.28423558841882,
+        "MAPE": 7.276632465257668,
+        "sMAPE": 7.329394792091478,
+        "WAPE": 5.934247101656683,
+        "MASE": 0.2898801046400557,
+        "R2": 0.9897163276332738,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 75.625732182498,
+        "RMSE": 115.4178524531587,
+        "MAPE": 7.273015303769252,
+        "sMAPE": 7.115489409881231,
+        "WAPE": 5.2330744013906365,
+        "MASE": 0.21769475298686786,
+        "R2": 0.9928197910734998,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 81.93501012500201,
+      "fit_cpu_s": 25.686676,
+      "predict_s": 0.04610099999263184,
+      "predict_us_per_step": 45.735119040309364,
+      "predict_ms_batch_median": 46.10099999263184,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.7668335062335245,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "mps",
+      "n_epochs": 43,
+      "best_epoch": 33,
+      "s_per_epoch": 1.903390038767992,
+      "stopped_early": true
+    },
+    {
+      "area": 5161,
+      "model": "tcn",
+      "n_params": 137094,
+      "val": {
+        "MAE": 102.12193238181592,
+        "RMSE": 155.76336444926625,
+        "MAPE": 7.322763392911087,
+        "sMAPE": 7.305993298057935,
+        "WAPE": 6.017895058753133,
+        "MASE": 0.29396619646277006,
+        "R2": 0.9895182025278495,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 88.18132375952759,
+        "RMSE": 136.16916601385816,
+        "MAPE": 7.798877315148686,
+        "sMAPE": 7.572705425863052,
+        "WAPE": 6.101883773278943,
+        "MASE": 0.2538370332410221,
+        "R2": 0.9900057856896454,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 60.298574542001006,
+      "fit_cpu_s": 19.306626,
+      "predict_s": 0.04493643749447074,
+      "predict_us_per_step": 44.57979910165748,
+      "predict_ms_batch_median": 44.93643749447074,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.804521002166439,
+      "latency_reps": 50,
+      "seed": 1337,
+      "device": "mps",
+      "n_epochs": 32,
+      "best_epoch": 22,
+      "s_per_epoch": 1.883682184875397,
+      "stopped_early": true
+    },
+    {
+      "area": 5161,
+      "model": "tcn",
+      "n_params": 137094,
+      "val": {
+        "MAE": 98.74266877208962,
+        "RMSE": 151.35773382478368,
+        "MAPE": 7.331731305613949,
+        "sMAPE": 7.326310195735031,
+        "WAPE": 5.818760031586164,
+        "MASE": 0.2842387143536166,
+        "R2": 0.9901027541365788,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 81.3800294074977,
+        "RMSE": 123.93213779565055,
+        "MAPE": 7.678342231459117,
+        "sMAPE": 7.437424563221436,
+        "WAPE": 5.63125455300189,
+        "MASE": 0.234258960391649,
+        "R2": 0.9917213602338123,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 49.449062874991796,
+      "fit_cpu_s": 15.937485000000002,
+      "predict_s": 0.045491166500141844,
+      "predict_us_per_step": 45.13012549617246,
+      "predict_ms_batch_median": 45.491166500141844,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.892937493219506,
+      "latency_reps": 50,
+      "seed": 2024,
+      "device": "mps",
+      "n_epochs": 26,
+      "best_epoch": 16,
+      "s_per_epoch": 1.901014793232137,
+      "stopped_early": true
+    }
+  ]
+}

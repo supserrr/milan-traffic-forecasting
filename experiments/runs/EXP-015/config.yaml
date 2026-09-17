@@ -1,0 +1,56 @@
+run:
+  id: EXP-015
+  seeds:
+  - 42
+  - 1337
+  - 2024
+  device: auto
+  notes: 'EXP-015: capacity grid, LSTM hidden 32. Halves the recurrent state at one
+    layer.'
+  cli: '--areas 5161 --seeds 42 1337 2024 --seq-len 144 --scaling log1p-standard --baselines
+    --run-id EXP-015 --models lstm --hidden 32 --notes EXP-015: capacity grid, LSTM
+    hidden 32. Halves the recurrent state at one layer.'
+  config_source: configs/experiment.yaml
+data:
+  areas:
+  - 5161
+  activity: internet
+  seq_len: 144
+  horizon: 1
+  scaling: log1p-standard
+  val_frac: 0.15555555555555556
+  calendar_features: true
+  test_window: eval_week
+models:
+  lstm:
+    loss: mse
+    lr: 0.001
+    batch_size: 128
+    max_epochs: 100
+    patience: 10
+    device: auto
+    hidden: 32
+    layers: 1
+    dropout: 0.1
+training:
+  loss: mse
+  lr: 0.001
+  batch_size: 128
+  max_epochs: 100
+  early_stopping:
+    monitor: val_loss
+    patience: 10
+evaluation:
+  metrics:
+  - MAE
+  - RMSE
+  - MAPE
+  - sMAPE
+  - WAPE
+  - MASE
+  - R2
+  mape_mode: epsilon
+  mase_scale: training period (Hyndman)
+  season: 144
+  timing_reps: 20
+  latency_reps: 50

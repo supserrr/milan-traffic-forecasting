@@ -1,0 +1,59 @@
+run:
+  id: EXP-010
+  seeds:
+  - 42
+  - 1337
+  - 2024
+  device: auto
+  notes: 'EXP-010: capacity grid, control. TCN at the reported configuration (levels
+    6, channels 32) on square 5161 alone, to confirm the grid reproduces EXP-008''s
+    numbers for that cell before any capacity is changed.'
+  cli: '--areas 5161 --seeds 42 1337 2024 --seq-len 144 --scaling log1p-standard --baselines
+    --run-id EXP-010 --models tcn --notes EXP-010: capacity grid, control. TCN at
+    the reported configuration (levels 6, channels 32) on square 5161 alone, to confirm
+    the grid reproduces EXP-008''s numbers for that cell before any capacity is changed.'
+  config_source: configs/experiment.yaml
+data:
+  areas:
+  - 5161
+  activity: internet
+  seq_len: 144
+  horizon: 1
+  scaling: log1p-standard
+  val_frac: 0.15555555555555556
+  calendar_features: true
+  test_window: eval_week
+models:
+  tcn:
+    loss: mse
+    lr: 0.001
+    batch_size: 128
+    max_epochs: 100
+    patience: 10
+    device: auto
+    channels: 32
+    levels: 6
+    kernel_size: 3
+    dropout: 0.1
+training:
+  loss: mse
+  lr: 0.001
+  batch_size: 128
+  max_epochs: 100
+  early_stopping:
+    monitor: val_loss
+    patience: 10
+evaluation:
+  metrics:
+  - MAE
+  - RMSE
+  - MAPE
+  - sMAPE
+  - WAPE
+  - MASE
+  - R2
+  mape_mode: epsilon
+  mase_scale: training period (Hyndman)
+  season: 144
+  timing_reps: 20
+  latency_reps: 50

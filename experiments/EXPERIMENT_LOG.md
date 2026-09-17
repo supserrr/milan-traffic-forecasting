@@ -37,6 +37,7 @@ were corrected afterwards rather than rewritten, and both corrections are noted 
 | EXP-007 | 2026-09-16 | tcn on 5059, 3 seeds, calendar off | control for EXP-006 | 83.28 | 68.42 | 98.78 | 38.16 | 20.88 | Test MAE 67.41 / 69.35 / 68.50, mean 68.42, sd 0.97. The calendar block costs the TCN 10.5 MAE on this cell, about three standard deviations of the noisier condition, and it also triples the seed variance (3.58 against 0.97). The effect is real, not a lucky seed. It is kept on for every model anyway, because it helps the other eight fits and switching it off for one model on one cell would break the equal-information comparison the brief asks for; instead it becomes the reported failure case. Next: EXP-008, the reported configuration, three models x three areas x three seeds. |
 | EXP-008 | 2026-09-16 | lstm, tcn, gbt on all three areas, 3 seeds (+ naive, seasonal_naive_144, linear_ar_144) | the reported configuration: log1p-standard, calendar on, seeds 42 / 1337 / 2024 | 100.11 | 82.13 | 124.35 | 40.76 | 20.90 | The run the report is built from. Row is the TCN on 5161, mean over seeds. Best model per cell: TCN 82.13 on 5161, **linear AR(144) 66.25 on 5059**, TCN 61.43 on 5259. The linear model wins outright on 5059 on all six metrics, beating the best trained model by 7.1 percent, and loses by only 3.4 and 3.5 percent on the other two. Averaged over the three cells the two are level: the per-area best trained model reaches 71.63 MAE against the linear model's 71.64, a difference of 0.015 percent, and the mean of the three per-area margins is -0.25 percent in the linear model's favour. A 145-parameter fit costing 0.02 s to train against 44 s therefore matches three modern sequence architectures. That is the study's headline and it is a negative one. Campaign closed. |
 | EXP-009 | 2026-09-17 | none: post-hoc inference on EXP-008 predictions, nothing retrained | added a Diebold-Mariano test on paired seed-averaged absolute-error differentials, and a per-period breakdown of the evaluation week | - | - | - | - | - | The per-area tables ranked models on gaps of 2 to 3 MAE units against seed spreads of the same size, which is a comparison of point estimates rather than a result, so the ranking needed a test. Showed: the TCN's leads over linear AR(144) on 5161 and 5259 are not separable from zero (p 0.365 and 0.322), the linear model's win on 5059 is (p 0.0009, Holm 0.008), and the TCN/LSTM reordering is (intersection-union p 0.0043, rejecting at every lag from 0 to 144). The per-period cut then localised the 5059 failure: 79.5 to 95.5 percent of the TCN's excess over the linear model falls on 19 and 20 December in every seed, and 83.9 percent of the calendar-feature penalty falls there too, so the ablation failure and the brief's period failure are one event. |
+| EXP-010 to EXP-018 | 2026-09-17 | lstm, tcn, gbt on square 5161, 3 seeds each | capacity grid, one variable per run, everything else at EXP-008's values. TCN levels 5/6/7 and channels 16/32/64; LSTM hidden 32/64/128; GBT max_leaf_nodes 15/31/63. Selected on VALIDATION | 100.11 | 82.13 | 124.35 | 41.15 | 21.32 | Row is the validation-selected TCN, which is the configuration already reported. Criterion 5 asks for tuning and until now not one architectural hyperparameter had been moved, so this closes that gap and tests the EDA's window claim at the same time. Showed three things. (1) EXP-010 reproduced EXP-008's TCN on this cell bit-for-bit on all three seeds, so the grid is comparable and the pipeline is deterministic. (2) The TCN's reported configuration survives: five levels reach only 125 steps and cost 1.5 percent of validation MAE, which is the 144-slot window from the PACF earning its keep; seven levels reach 509 and buy nothing for 13 percent more time per epoch; 64 channels quadruple the parameters for +0.4 percent, and 16 channels cost 5.8 percent. (3) The LSTM and the tree model were left at defaults that validation does not select: 128 hidden units improve validation MAE by 0.6 percent, which is inside their own seed spread of 3.02, and 63 leaves improve it by 2.3 percent, which is not. Next: nothing is retrained. The reported run stays EXP-008 and the shortfall is written into the limitations instead, because re-picking two architectures after the analysis is closed would mean redoing the tests, the failure analysis and the report on a configuration the grid cannot show is better than seed noise for one of the two. |
 
 ---
 
@@ -386,3 +387,88 @@ would have been reporting noise on the order of the gaps being compared. And the
 naive is not merely weak but wrong at this horizon, at 338.6 / 171.7 / 470.3 against persistence's
 92.8 / 81.5 / 76.0; a ten-minute-old observation beats a day-old one, which is the same conclusion
 the sequence-length evidence reached from the other direction.
+
+### What did not work, continued
+
+- **Calendar features on the TCN at square 5059.** Documented above. Kept on anyway, because
+  switching them off for one model on one cell would end the equal-information comparison.
+- **Three seeds, the first time.** EXP-004 and EXP-005 were run, logged and then found to be
+  measuring nothing, because both trainable models re-seeded themselves inside `fit`. The runs are
+  kept in the log rather than deleted: a standard deviation of exactly 0.000 is the evidence that
+  found the defect, and a log that quietly dropped them would be hiding the most useful thing in
+  this section.
+
+#### EXP-009: testing the ranking, and locating the failure (2026-09-17)
+
+No model was retrained, so this is the one id in the log with no `experiments/runs/EXP-009/`
+directory; the gap is deliberate. This pass reads `EXP-008/predictions.npy` and answers two
+questions the per-area tables cannot.
+
+**Can the margins be told apart?** The unit of test decides the answer, and getting it wrong is
+easy. Each cell of the results tables is the mean over seeds of a per-seed metric, so the
+differential to test is between seed-averaged pointwise losses, whose sample mean is exactly the
+printed margin. Testing the mean of the three forecasts instead scores a three-member ensemble
+that appears in no table: on 5161 that ensemble is 2.68 MAE units better than the tabulated TCN,
+which is 94 percent of the margin under test, and it moves the comparison from p 0.365 to p 0.097.
+The first draft of this analysis made that mistake and reported the wrong number.
+
+With the right unit, only four of the fifteen comparisons separate from zero at the 5 percent
+level, and the study's headline was one of the eleven that do not. The reordering between cells
+does separate, jointly at p 0.0043 as an intersection-union test. The minimum detectable
+difference is 10.0 to 16.1 percent of the linear model's MAE per cell, against observed
+inter-model margins of 0.6 to 3.5 percent everywhere except 5059, so most of what the tables
+appear to rank was never resolvable in one week.
+
+**Where does the 5059 failure happen?** Entirely on Thursday 19 and Friday 20 December. Outside
+those two days the TCN and the linear model are level (70.14 against 67.43, p 0.29) and the TCN
+beats persistence by 11.90 units (p < 0.0001); on them it loses to persistence (p 0.010). It is
+bias, not turbulence or lag: signed error -78.4 against the linear model's -5.2, squared bias
+30.4 percent of MSE against 0.3 percent, and Thursday is the calmest weekday of the week. The
+calendar-off control (EXP-007) removes 34.2 and 25.0 percent of those two days' error, and 83.9
+percent of the whole calendar penalty falls there. The feature-ablation failure already in the
+log and the period failure the brief asks for are the same event, which is why the report now
+presents them together rather than as two findings.
+
+The candidate that did **not** survive: square 5259's weekend, where every model's WAPE doubles
+from 4.8 to 9.4 percent. Absolute error halves over the same slots, 76.2 to 41.2, because the
+level collapses from 1595 to 441, and no model is significantly worse than any other there. It is
+a property of the cell and of the metric, not a failure, and it is reported as the warning about
+WAPE that it actually is.
+
+#### EXP-010 to EXP-018: the capacity grid (2026-09-17)
+
+The honest reading of this log before today was that the input representation had been tuned and
+the architectures had not. Sequence length, scaling and the calendar block each had a run and a
+reason; capacity had neither. Nine runs on square 5161, the cell the protocol iterates on, three
+seeds each, one variable moved per run and everything else pinned to EXP-008.
+
+**The control comes first.** EXP-010 re-ran the reported TCN configuration on this one cell and
+returned 78.0040, 78.5989 and 89.8018 test MAE, identical to EXP-008's three seeds to every
+decimal. That is worth more than it looks: it says the seed fix from EXP-006 holds, that a run
+restricted to one area is comparable with the same area inside a three-area run, and that the rest
+of this grid can be read against EXP-008 rather than needing its own baselines.
+
+**The TCN's configuration survives, and the EDA's window claim is now measured rather than
+argued.** Section 4 derived a 144-slot window from the PACF. Five levels give a receptive field of
+125, so the oldest 19 steps of every window cannot reach the output, and the harness says so in a
+warning. That costs 1.55 validation MAE, 1.5 percent. Seven levels reach 509 steps, four times
+more history than the window contains, and cost 1.60 instead of buying anything. Width behaves
+like a knee rather than a slope: 16 channels cost 5.84 MAE, 64 channels quadruple the parameters
+to 137 094 and 48 percent of the time per epoch to gain 0.41 MAE in the wrong direction. Six
+levels at 32 channels is the validation pick, and it is what was already reported.
+
+**The other two were not tuned, and validation says so.** The LSTM at 128 hidden units scores
+103.65 against the reported 64's 104.28, and the tree model at 63 leaves scores 103.98 against
+31's 106.42. The tree model's 2.44-unit gap exceeds every seed spread in that block, 0.80 and
+1.30, so it is real: the reported ensemble is under-capacity on this cell. The LSTM's 0.63-unit
+gap sits inside its own spread of 3.02 and is not established by this grid.
+
+**Why nothing is retrained.** Adopting the two would move the reported tables, and with them the
+Diebold-Mariano tests, the per-period failure analysis and the abstract, four days before the
+deadline, on the strength of one gap that is real and one that is not. It would also change a sign
+in the narrative: the LSTM at 128 units would reach 83.56 test MAE on 5161 against the linear
+model's 84.98, moving from 0.7 percent behind to 1.7 percent ahead. That margin is well inside the
+interval the report already publishes for that pair, $[-6.57, +5.44]$, so it changes no conclusion
+and would buy a redraft for nothing. The grid is therefore reported as what it is, evidence that
+the architectures were checked and that two of them were left at a default, and the shortfall goes
+into the limitations rather than into a new headline.

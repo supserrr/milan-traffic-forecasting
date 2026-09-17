@@ -1,0 +1,13 @@
+EXP-011
+hardware: Darwin | 27.0.0 | arm64 | 8P/8L cores | 16 GiB RAM | device:mps
+
+EXP-011: capacity grid, TCN depth 5. Receptive field 125, which does not cover the 144-slot window the PACF argues for, so the oldest 19 steps of every window cannot reach the output. Tests whether the window the EDA derived is actually used.
+
+ area model  seed  n_params     MAE     RMSE   MAPE  sMAPE   WAPE   MASE     R2  n_scored  n_dropped device  epochs  best_epoch  s_per_epoch   fit_s  fit_cpu_s  predict_ms  latency_ms  predict_us_per_step
+ 5161   tcn    42     28486 79.9049 120.0550 7.7135 7.4911 5.5292 0.2300 0.9922      1008          0    mps      32          22        1.204 38.6151    17.1057      19.315      3.4410               19.162
+ 5161   tcn  1337     28486 80.0052 122.1128 7.5465 7.3552 5.5361 0.2303 0.9920      1008          0    mps      24          14        1.151 27.6410    11.9647      17.178      2.8805               17.042
+ 5161   tcn  2024     28486 88.6810 134.3205 7.8818 7.6889 6.1365 0.2553 0.9903      1008          0    mps      26          16        1.070 27.8299    12.2828      17.859      3.1801               17.718
+
+mean and std over seeds:
+ area model  n_params_mean  n_params_std  MAE_mean  MAE_std  RMSE_mean  RMSE_std  MAPE_mean  MAPE_std  sMAPE_mean  sMAPE_std  WAPE_mean  WAPE_std  MASE_mean  MASE_std  R2_mean  R2_std  n_scored_mean  n_scored_std  n_dropped_mean  n_dropped_std  s_per_epoch_mean  s_per_epoch_std  fit_s_mean  fit_s_std  fit_cpu_s_mean  fit_cpu_s_std  predict_ms_mean  predict_ms_std  latency_ms_mean  latency_ms_std  predict_us_per_step_mean  predict_us_per_step_std
+ 5161   tcn        28486.0           0.0   82.8637   5.0382   125.4961    7.7111     7.7139    0.1677      7.5117     0.1678     5.7339    0.3487     0.2385    0.0145   0.9915   0.001         1008.0           0.0             0.0            0.0            1.1417           0.0675      31.362     6.2821         13.7844         2.8807          18.1173          1.0917           3.1672          0.2805                    17.974                   1.0829

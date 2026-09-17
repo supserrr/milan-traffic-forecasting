@@ -1,0 +1,51 @@
+run:
+  id: EXP-017
+  seeds:
+  - 42
+  - 1337
+  - 2024
+  device: auto
+  notes: 'EXP-017: capacity grid, GBT 15 leaves. Halves the tree size at the reported
+    300 iterations and learning rate 0.05.'
+  cli: '--areas 5161 --seeds 42 1337 2024 --seq-len 144 --scaling log1p-standard --baselines
+    --run-id EXP-017 --models gbt --gbt-leaves 15 --notes EXP-017: capacity grid,
+    GBT 15 leaves. Halves the tree size at the reported 300 iterations and learning
+    rate 0.05.'
+  config_source: configs/experiment.yaml
+data:
+  areas:
+  - 5161
+  activity: internet
+  seq_len: 144
+  horizon: 1
+  scaling: log1p-standard
+  val_frac: 0.15555555555555556
+  calendar_features: true
+  test_window: eval_week
+models:
+  gbt:
+    max_iter: 300
+    learning_rate: 0.05
+    max_leaf_nodes: 15
+training:
+  loss: mse
+  lr: 0.001
+  batch_size: 128
+  max_epochs: 100
+  early_stopping:
+    monitor: val_loss
+    patience: 10
+evaluation:
+  metrics:
+  - MAE
+  - RMSE
+  - MAPE
+  - sMAPE
+  - WAPE
+  - MASE
+  - R2
+  mape_mode: epsilon
+  mase_scale: training period (Hyndman)
+  season: 144
+  timing_reps: 20
+  latency_reps: 50

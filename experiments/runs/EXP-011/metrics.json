@@ -1,0 +1,222 @@
+{
+  "run_id": "EXP-011",
+  "hardware": "Darwin | 27.0.0 | arm64 | 8P/8L cores | 16 GiB RAM | device:mps",
+  "predictions_axes": [
+    "area",
+    "model",
+    "seed",
+    "step"
+  ],
+  "areas": [
+    5161
+  ],
+  "models": [
+    "tcn"
+  ],
+  "seeds": [
+    42,
+    1337,
+    2024
+  ],
+  "device_by_model": {
+    "tcn": "mps"
+  },
+  "timing_protocol": {
+    "fit_s": "wall seconds of one fit call, device synchronised before the clock stops",
+    "fit_cpu_s": "process CPU seconds of the same call",
+    "predict_ms_batch_median": "median of n repetitions of predicting the whole evaluation window, after one untimed warm-up call, device synchronised before each stop",
+    "latency_ms_single_median": "median of n repetitions of predicting a single window, after two untimed warm-ups",
+    "why": "single-shot timings varied five-fold for identical operations in EXP-000, and the first MPS call at a new batch shape is about thirty times slower than a warm one"
+  },
+  "config": {
+    "run": {
+      "id": "EXP-011",
+      "seeds": [
+        42,
+        1337,
+        2024
+      ],
+      "device": "auto",
+      "notes": "EXP-011: capacity grid, TCN depth 5. Receptive field 125, which does not cover the 144-slot window the PACF argues for, so the oldest 19 steps of every window cannot reach the output. Tests whether the window the EDA derived is actually used.",
+      "cli": "--areas 5161 --seeds 42 1337 2024 --seq-len 144 --scaling log1p-standard --baselines --run-id EXP-011 --models tcn --levels 5 --notes EXP-011: capacity grid, TCN depth 5. Receptive field 125, which does not cover the 144-slot window the PACF argues for, so the oldest 19 steps of every window cannot reach the output. Tests whether the window the EDA derived is actually used.",
+      "config_source": "configs/experiment.yaml"
+    },
+    "data": {
+      "areas": [
+        5161
+      ],
+      "activity": "internet",
+      "seq_len": 144,
+      "horizon": 1,
+      "scaling": "log1p-standard",
+      "val_frac": 0.15555555555555556,
+      "calendar_features": true,
+      "test_window": "eval_week"
+    },
+    "models": {
+      "tcn": {
+        "loss": "mse",
+        "lr": 0.001,
+        "batch_size": 128,
+        "max_epochs": 100,
+        "patience": 10,
+        "device": "auto",
+        "channels": 32,
+        "levels": 5,
+        "kernel_size": 3,
+        "dropout": 0.1
+      }
+    },
+    "training": {
+      "loss": "mse",
+      "lr": 0.001,
+      "batch_size": 128,
+      "max_epochs": 100,
+      "early_stopping": {
+        "monitor": "val_loss",
+        "patience": 10
+      }
+    },
+    "evaluation": {
+      "metrics": [
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "WAPE",
+        "MASE",
+        "R2"
+      ],
+      "mape_mode": "epsilon",
+      "mase_scale": "training period (Hyndman)",
+      "season": 144,
+      "timing_reps": 20,
+      "latency_reps": 50
+    }
+  },
+  "results": [
+    {
+      "area": 5161,
+      "model": "tcn",
+      "n_params": 28486,
+      "val": {
+        "MAE": 99.66973117152253,
+        "RMSE": 153.28571913678894,
+        "MAPE": 7.376343487896597,
+        "sMAPE": 7.362748231652095,
+        "WAPE": 5.873390453304434,
+        "MASE": 0.28690733803795915,
+        "R2": 0.9898490072654875,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 79.90491582212923,
+        "RMSE": 120.054996148141,
+        "MAPE": 7.713507362214293,
+        "sMAPE": 7.491055707031258,
+        "WAPE": 5.52918110630643,
+        "MASE": 0.2300127272865012,
+        "R2": 0.9922312422519933,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 38.61509066699364,
+      "fit_cpu_s": 17.105653999999998,
+      "predict_s": 0.019314853998366743,
+      "predict_us_per_step": 19.161561506316215,
+      "predict_ms_batch_median": 19.314853998366743,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.4409789950586855,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "mps",
+      "n_epochs": 32,
+      "best_epoch": 22,
+      "s_per_epoch": 1.2037813580623151,
+      "stopped_early": true
+    },
+    {
+      "area": 5161,
+      "model": "tcn",
+      "n_params": 28486,
+      "val": {
+        "MAE": 104.16208849008011,
+        "RMSE": 158.28502550749587,
+        "MAPE": 7.527978046560479,
+        "sMAPE": 7.580476383222985,
+        "WAPE": 6.138118453244972,
+        "MASE": 0.2998389499188484,
+        "R2": 0.9891760746933715,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 80.00522994896657,
+        "RMSE": 122.11278442202618,
+        "MAPE": 7.546486422621449,
+        "sMAPE": 7.355210261591276,
+        "WAPE": 5.536122543752399,
+        "MASE": 0.23030148956929475,
+        "R2": 0.9919626409258899,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 27.64096120899194,
+      "fit_cpu_s": 11.9647,
+      "predict_s": 0.017178249996504746,
+      "predict_us_per_step": 17.041914679072168,
+      "predict_ms_batch_median": 17.178249996504746,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 2.880541498598177,
+      "latency_reps": 50,
+      "seed": 1337,
+      "device": "mps",
+      "n_epochs": 24,
+      "best_epoch": 14,
+      "s_per_epoch": 1.1507306457509305,
+      "stopped_early": true
+    },
+    {
+      "area": 5161,
+      "model": "tcn",
+      "n_params": 28486,
+      "val": {
+        "MAE": 101.14842618992984,
+        "RMSE": 154.26605228714044,
+        "MAPE": 7.415513920646638,
+        "sMAPE": 7.465052890391462,
+        "WAPE": 5.960527772753166,
+        "MASE": 0.29116388058617915,
+        "R2": 0.9897187514725362,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 88.68099482050494,
+        "RMSE": 134.32048174414783,
+        "MAPE": 7.881835860025781,
+        "sMAPE": 7.688927810081303,
+        "WAPE": 6.136459515726055,
+        "MASE": 0.25527537658071575,
+        "R2": 0.9902753140671912,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 27.829889375003404,
+      "fit_cpu_s": 12.282792,
+      "predict_s": 0.017859375002444722,
+      "predict_us_per_step": 17.717633930996747,
+      "predict_ms_batch_median": 17.85937500244472,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.1800830038264394,
+      "latency_reps": 50,
+      "seed": 2024,
+      "device": "mps",
+      "n_epochs": 26,
+      "best_epoch": 16,
+      "s_per_epoch": 1.0696224536541894,
+      "stopped_early": true
+    }
+  ]
+}

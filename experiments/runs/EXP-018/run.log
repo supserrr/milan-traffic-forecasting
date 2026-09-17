@@ -1,0 +1,13 @@
+EXP-018
+hardware: Darwin | 27.0.0 | arm64 | 8P/8L cores | 16 GiB RAM | device:cpu
+
+EXP-018: capacity grid, GBT 63 leaves. Doubles the tree size at the reported 300 iterations and learning rate 0.05.
+
+ area model  seed  n_params     MAE     RMSE   MAPE  sMAPE   WAPE   MASE     R2  n_scored  n_dropped device  epochs  best_epoch  s_per_epoch  fit_s  fit_cpu_s  predict_ms  latency_ms  predict_us_per_step
+ 5161   gbt    42      9765 86.5440 133.5067 8.2527 8.0511 5.9886 0.2491 0.9904      1008          0    cpu     155         135        0.024 3.6619    20.6934      10.352      6.6070               10.270
+ 5161   gbt  1337      9261 86.7589 130.6940 8.3805 8.1678 6.0035 0.2497 0.9908      1008          0    cpu     147         127        0.023 3.4348    19.5351       9.930      6.6176                9.851
+ 5161   gbt  2024      6741 87.2904 130.0598 8.5028 8.2633 6.0402 0.2513 0.9909      1008          0    cpu     107          87        0.026 2.8385    16.0224       7.238      5.5301                7.180
+
+mean and std over seeds:
+ area model  n_params_mean  n_params_std  MAE_mean  MAE_std  RMSE_mean  RMSE_std  MAPE_mean  MAPE_std  sMAPE_mean  sMAPE_std  WAPE_mean  WAPE_std  MASE_mean  MASE_std  R2_mean  R2_std  n_scored_mean  n_scored_std  n_dropped_mean  n_dropped_std  s_per_epoch_mean  s_per_epoch_std  fit_s_mean  fit_s_std  fit_cpu_s_mean  fit_cpu_s_std  predict_ms_mean  predict_ms_std  latency_ms_mean  latency_ms_std  predict_us_per_step_mean  predict_us_per_step_std
+ 5161   gbt         8589.0     1620.1333   86.8644   0.3842   131.4202    1.8346     8.3787    0.1251      8.1607     0.1063     6.0108    0.0266       0.25    0.0011   0.9907  0.0003         1008.0           0.0             0.0            0.0            0.0243           0.0015      3.3117     0.4253         18.7503         2.4324           9.1733          1.6893           6.2516          0.6248                    9.1003                   1.6762

@@ -1,0 +1,221 @@
+{
+  "run_id": "EXP-015",
+  "hardware": "Darwin | 27.0.0 | arm64 | 8P/8L cores | 16 GiB RAM | device:mps",
+  "predictions_axes": [
+    "area",
+    "model",
+    "seed",
+    "step"
+  ],
+  "areas": [
+    5161
+  ],
+  "models": [
+    "lstm"
+  ],
+  "seeds": [
+    42,
+    1337,
+    2024
+  ],
+  "device_by_model": {
+    "lstm": "mps"
+  },
+  "timing_protocol": {
+    "fit_s": "wall seconds of one fit call, device synchronised before the clock stops",
+    "fit_cpu_s": "process CPU seconds of the same call",
+    "predict_ms_batch_median": "median of n repetitions of predicting the whole evaluation window, after one untimed warm-up call, device synchronised before each stop",
+    "latency_ms_single_median": "median of n repetitions of predicting a single window, after two untimed warm-ups",
+    "why": "single-shot timings varied five-fold for identical operations in EXP-000, and the first MPS call at a new batch shape is about thirty times slower than a warm one"
+  },
+  "config": {
+    "run": {
+      "id": "EXP-015",
+      "seeds": [
+        42,
+        1337,
+        2024
+      ],
+      "device": "auto",
+      "notes": "EXP-015: capacity grid, LSTM hidden 32. Halves the recurrent state at one layer.",
+      "cli": "--areas 5161 --seeds 42 1337 2024 --seq-len 144 --scaling log1p-standard --baselines --run-id EXP-015 --models lstm --hidden 32 --notes EXP-015: capacity grid, LSTM hidden 32. Halves the recurrent state at one layer.",
+      "config_source": "configs/experiment.yaml"
+    },
+    "data": {
+      "areas": [
+        5161
+      ],
+      "activity": "internet",
+      "seq_len": 144,
+      "horizon": 1,
+      "scaling": "log1p-standard",
+      "val_frac": 0.15555555555555556,
+      "calendar_features": true,
+      "test_window": "eval_week"
+    },
+    "models": {
+      "lstm": {
+        "loss": "mse",
+        "lr": 0.001,
+        "batch_size": 128,
+        "max_epochs": 100,
+        "patience": 10,
+        "device": "auto",
+        "hidden": 32,
+        "layers": 1,
+        "dropout": 0.1
+      }
+    },
+    "training": {
+      "loss": "mse",
+      "lr": 0.001,
+      "batch_size": 128,
+      "max_epochs": 100,
+      "early_stopping": {
+        "monitor": "val_loss",
+        "patience": 10
+      }
+    },
+    "evaluation": {
+      "metrics": [
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "WAPE",
+        "MASE",
+        "R2"
+      ],
+      "mape_mode": "epsilon",
+      "mase_scale": "training period (Hyndman)",
+      "season": 144,
+      "timing_reps": 20,
+      "latency_reps": 50
+    }
+  },
+  "results": [
+    {
+      "area": 5161,
+      "model": "lstm",
+      "n_params": 4518,
+      "val": {
+        "MAE": 107.63654529858921,
+        "RMSE": 163.97115412571517,
+        "MAPE": 7.955458262646689,
+        "sMAPE": 7.941961060979182,
+        "WAPE": 6.342863075405111,
+        "MASE": 0.3098404533074923,
+        "R2": 0.9883844432083161,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 92.49271286182399,
+        "RMSE": 143.23179659724488,
+        "MAPE": 8.536483196199743,
+        "sMAPE": 8.302292996356938,
+        "WAPE": 6.400218999855214,
+        "MASE": 0.26624771355535964,
+        "R2": 0.9889421681472869,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 19.76742187498894,
+      "fit_cpu_s": 9.691077,
+      "predict_s": 0.0093314165060292,
+      "predict_us_per_step": 9.257357644870238,
+      "predict_ms_batch_median": 9.3314165060292,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.4754789958242327,
+      "latency_reps": 50,
+      "seed": 42,
+      "device": "mps",
+      "n_epochs": 30,
+      "best_epoch": 20,
+      "s_per_epoch": 0.6565640263317618,
+      "stopped_early": true
+    },
+    {
+      "area": 5161,
+      "model": "lstm",
+      "n_params": 4518,
+      "val": {
+        "MAE": 105.90605666662843,
+        "RMSE": 162.63853920437418,
+        "MAPE": 7.718979150627189,
+        "sMAPE": 7.80781697681366,
+        "WAPE": 6.24088792917923,
+        "MASE": 0.30485910258982657,
+        "R2": 0.9885724782831057,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 84.6758731163966,
+        "RMSE": 129.80498863170854,
+        "MAPE": 7.74985007507006,
+        "sMAPE": 7.720704170667562,
+        "WAPE": 5.85931707677888,
+        "MASE": 0.24374631160645305,
+        "R2": 0.9909181595114652,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 26.578756124989013,
+      "fit_cpu_s": 13.323652999999998,
+      "predict_s": 0.009420750000572298,
+      "predict_us_per_step": 9.345982143424898,
+      "predict_ms_batch_median": 9.420750000572298,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.5103124973829836,
+      "latency_reps": 50,
+      "seed": 1337,
+      "device": "mps",
+      "n_epochs": 43,
+      "best_epoch": 33,
+      "s_per_epoch": 0.6179830629989738,
+      "stopped_early": true
+    },
+    {
+      "area": 5161,
+      "model": "lstm",
+      "n_params": 4518,
+      "val": {
+        "MAE": 105.06313228673932,
+        "RMSE": 159.7881834269324,
+        "MAPE": 7.868229340085913,
+        "sMAPE": 7.885148052708561,
+        "WAPE": 6.191215637024871,
+        "MASE": 0.3024326769623199,
+        "R2": 0.9889695191640467,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "test": {
+        "MAE": 87.96173710843203,
+        "RMSE": 136.0378286511882,
+        "MAPE": 8.314945843303729,
+        "sMAPE": 8.056831734862767,
+        "WAPE": 6.086689034007366,
+        "MASE": 0.2532049354035545,
+        "R2": 0.9900250555547593,
+        "n_scored": 1008,
+        "n_dropped": 0
+      },
+      "fit_s": 25.816759624998667,
+      "fit_cpu_s": 13.046305,
+      "predict_s": 0.009695958498923574,
+      "predict_us_per_step": 9.619006447344814,
+      "predict_ms_batch_median": 9.695958498923574,
+      "predict_ms_batch_reps": 20,
+      "latency_ms_single_median": 3.6035629964317195,
+      "latency_reps": 50,
+      "seed": 2024,
+      "device": "mps",
+      "n_epochs": 42,
+      "best_epoch": 32,
+      "s_per_epoch": 0.6145544285477843,
+      "stopped_early": true
+    }
+  ]
+}
