@@ -1,6 +1,6 @@
-"""Descriptive statistics quoted in Section IV, and the regime diagnostics of Section VI.
+"""Descriptive statistics quoted in Section 4, and the regime diagnostics of Section 6.
 
-Why this module exists. Section VIII of the report claims that every figure and every
+Why this module exists. Section 8 of the report claims that every figure and every
 table cell can be regenerated from a clean clone. That claim was false for one block of
 numbers: the spatial concentration figures, the cell coordinates, the regime contrasts
 between the three evaluation areas and the holiday and zero counts were all computed
@@ -10,7 +10,7 @@ and a report that says otherwise is making a claim it cannot support. Everything
 IV asserts descriptively is therefore computed here, once, with tests, and written to
 ``reports/tables/eda_stats.md`` by ``scripts/make_eda_stats.py``.
 
-The load-bearing part is the regime block. Section VI names the dilated convolutional
+The load-bearing part is the regime block. Section 6 names the dilated convolutional
 network as the best architecture on the grounds that its only statistically resolved win
 sits on square 5259, the cell whose daily shape *changes* between working and
 non-working days rather than merely shrinking. That argument rests on four numbers per
@@ -59,7 +59,7 @@ CELL_LAT = (GRID_LAT_MAX - GRID_LAT_MIN) / GRID_SIDE
 #: IUGG mean Earth radius, the sphere every distance below is measured on.
 EARTH_RADIUS_M = 6_371_008.8
 
-#: Reference point for the bearings quoted in Section IV: Piazza del Duomo.
+#: Reference point for the bearings quoted in Section 4: Piazza del Duomo.
 DUOMO_LAT = 45.4642
 DUOMO_LON = 9.1900
 
@@ -420,7 +420,7 @@ def top_share(values: Any, fraction: float = 0.01) -> float:
 
 
 def concentration_stats(values: Any) -> dict[str, float]:
-    """The spatial-concentration block of Section IV, as one dictionary.
+    """The spatial-concentration block of Section 4, as one dictionary.
 
     ``decades_below_median`` and ``decades_above_median`` are the orders of magnitude
     separating the emptiest and busiest cells from the median one. They are reported as a
@@ -542,7 +542,7 @@ def regime_diagnostics(
     *,
     period: int = SLOTS_PER_DAY,
 ) -> dict[str, float]:
-    """Three of the four per-cell regime numbers Section VI's best-model argument rests on.
+    """Three of the four per-cell regime numbers Section 6's best-model argument rests on.
 
     The fourth, the weekday-to-weekend ratio, is computed by :func:`weekday_weekend_ratio`
     because it is read off a different slice: the first fortnight the brief fixes for the
@@ -559,7 +559,7 @@ def regime_diagnostics(
 def calendar_signal_r2(x: Any, working: Any, *, period: int = SLOTS_PER_DAY) -> dict[str, float]:
     """How much the working-day flag explains beyond time of day, on one cell.
 
-    Section VI.D's failure analysis turns on square 5059 having the weakest calendar signal
+    Section 6.4's failure analysis turns on square 5059 having the weakest calendar signal
     of the three, and the weekday-to-weekend ratio does not show that: 1.29 on 5059 sits
     between 0.79 on 5161 and 2.98 on 5259, and 0.79 is a contrast of almost the same size in
     the other direction. The ratio is the wrong statistic because the models already receive
@@ -623,7 +623,7 @@ def remainder_acf(
 
     The point of quoting these is that "irregular" is not "unpredictable": whatever STL
     leaves over is still strongly correlated one step ahead, which is the persistence
-    floor of Section VI seen from the decomposition side.
+    floor of Section 6 seen from the decomposition side.
     """
     r = np.asarray(remainder, dtype=np.float64).ravel()
     values = sm_acf(r, nlags=int(max(lags)), fft=True)

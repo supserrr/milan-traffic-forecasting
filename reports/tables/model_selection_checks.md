@@ -47,12 +47,12 @@ observation, once per likelihood evaluation. Each row is the median of
 
 | order | seasonal order | state dim | free params | min (s) | median (s) | max (s) |
 |:--|:--|:--|:--|--:|--:|--:|
-| (1, 0, 1) | (1, 0, 1, 144) | 146 | 5 | 0.77 | 0.78 | 0.78 |
-| (2, 0, 2) | (1, 0, 1, 144) | 147 | 7 | 0.82 | 0.83 | 0.83 |
-| (1, 0, 1) | (0, 1, 1, 144) | 290 | 4 | 2.97 | 2.99 | 3.03 |
-| (1, 1, 1) | (1, 1, 1, 144) | 291 | 5 | 2.58 | 2.65 | 2.66 |
+| (1, 0, 1) | (1, 0, 1, 144) | 146 | 5 | 0.77 | 0.77 | 0.77 |
+| (2, 0, 2) | (1, 0, 1, 144) | 147 | 7 | 0.82 | 0.83 | 0.87 |
+| (1, 0, 1) | (0, 1, 1, 144) | 290 | 4 | 2.84 | 2.84 | 2.85 |
+| (1, 1, 1) | (1, 1, 1, 144) | 291 | 5 | 2.54 | 2.56 | 3.05 |
 
-**One likelihood evaluation costs 0.77 to 3.03 s** across the 4 candidate orders. Differencing is what moves it: the undifferenced orders carry a state vector of 146 to 147, a difference at the seasonal period takes it to 290 to 291, and the likelihood then costs 3.5 times as much.
+**One likelihood evaluation costs 0.77 to 3.05 s** across the 4 candidate orders. Differencing is what moves it: the undifferenced orders carry a state vector of 146 to 147, a difference at the seasonal period takes it to 290 to 291, and the likelihood then costs 3.4 times as much.
 
 A fit needs many of those. Below is what a single fit of the cheapest order does
 with a fixed budget. It cannot hang: the likelihood refuses to run once the budget
@@ -65,8 +65,8 @@ is spent, and the optimiser is capped at a fixed number of iterations besides.
 | state dimension | 146 |
 | time budget (s) | 120 |
 | iteration cap | 50 |
-| likelihood evaluations completed | 151 |
-| wall time of the attempt (s) | 120.4 |
+| likelihood evaluations completed | 155 |
+| wall time of the attempt (s) | 120.7 |
 | outcome | stopped by the 120 s budget, unconverged |
 
 **Hardware.** Darwin | 27.0.0 | arm64

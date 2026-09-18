@@ -1,7 +1,7 @@
 """Descriptive statistics on synthetic data: a known grid and two made-up cells.
 
-These statistics are quoted directly in Section IV and underpin the best-model argument
-of Section VI, which makes them the numbers in the project with the shortest path from a
+These statistics are quoted directly in Section 4 and underpin the best-model argument
+of Section 6, which makes them the numbers in the project with the shortest path from a
 silent error to a wrong claim in the report. Nothing here reads ``data/processed/``: every
 fixture is constructed so that the right answer can be written down independently, which
 is the only way a test of a descriptive statistic is worth anything.

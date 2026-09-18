@@ -11,10 +11,10 @@ BIN      = $(VENV)/bin
 VPY      = $(BIN)/python
 
 .DEFAULT_GOAL := help
-.PHONY: help setup check-venv ingest ingest-smoke bench eda-stats tsa figures significance period-breakdown capacity-table check-log check-model-selection test test-all lint format clean clean-processed
+.PHONY: help setup check-venv ingest ingest-smoke ingest-table bench eda-stats section4-checks tsa figures significance period-breakdown capacity-table check-log check-model-selection report report-draft test test-all lint format clean clean-processed
 
 help:  ## show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	  | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
 setup:  ## create .venv and install dependencies
@@ -36,11 +36,17 @@ ingest: check-venv  ## build data/processed/ from ../Dataverse (resumes from cac
 ingest-smoke: check-venv  ## ingest three days only, to check the pipeline end to end
 	$(VPY) scripts/run_ingest.py --limit 3
 
+ingest-table: check-venv  ## full-run ingestion evidence -> reports/tables/ingest_scale.md
+	$(VPY) scripts/make_ingest_table.py
+
 bench: check-venv  ## memory benchmark -> reports/tables/memory_benchmark.md
 	$(VPY) scripts/benchmark_memory.py
 
 eda-stats: check-venv  ## exploratory summary statistics -> reports/tables/eda_stats.md
 	$(VPY) scripts/make_eda_stats.py
+
+section4-checks: check-venv  ## the Section 4 claims no other table carries -> reports/tables/section4_checks.md
+	$(VPY) scripts/make_section4_checks.py
 
 tsa: check-venv  ## time-series diagnostics -> reports/tables/tsa_5161.md + 3 figures
 	$(VPY) scripts/run_tsa.py
@@ -62,6 +68,22 @@ check-log: check-venv  ## re-derive EXPERIMENT_LOG.md's numbers from metrics.jso
 
 check-model-selection: check-venv  ## top-cell ranking + SARIMAX cost -> reports/tables/model_selection_checks.md
 	$(VPY) scripts/check_model_selection.py
+
+# The video URL is a build input rather than a string in the sources, so the reference
+# list cannot be published with a stand-in inside it. `report` refuses to build without
+# one; `report-draft` omits reference [28] altogether instead of printing a placeholder.
+VIDEO_URL ?=
+
+report: check-venv  ## build reports/report/report.pdf (requires VIDEO_URL=...)
+	@test -n "$(VIDEO_URL)" || { \
+	  echo "VIDEO_URL is not set, and the submitted report has to cite the presentation."; \
+	  echo "Upload the video, then:  make report VIDEO_URL=https://..."; \
+	  echo "For a proofreading copy without that reference:  make report-draft"; \
+	  exit 1; }
+	$(VPY) scripts/build_report.py --video "$(VIDEO_URL)"
+
+report-draft: check-venv  ## build the report with no video reference, for proofreading only
+	$(VPY) scripts/build_report.py
 
 test: check-venv  ## run the test suite (skips anything touching raw data)
 	$(VPY) -m pytest -m "not slow"
